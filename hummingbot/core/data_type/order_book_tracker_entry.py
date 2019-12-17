@@ -4,6 +4,7 @@ from hummingbot.core.data_type.order_book import OrderBook
 from hummingbot.market.bittrex.bittrex_active_order_tracker import BittrexActiveOrderTracker
 from hummingbot.market.coinbase_pro.coinbase_pro_active_order_tracker import CoinbaseProActiveOrderTracker
 from hummingbot.market.ddex.ddex_active_order_tracker import DDEXActiveOrderTracker
+from hummingbot.market.kyber.kyber_active_order_tracker import KyberActiveOrderTracker
 from hummingbot.market.idex.idex_active_order_tracker import IDEXActiveOrderTracker
 from hummingbot.market.radar_relay.radar_relay_active_order_tracker import RadarRelayActiveOrderTracker
 from hummingbot.market.bamboo_relay.bamboo_relay_active_order_tracker import BambooRelayActiveOrderTracker
@@ -51,6 +52,24 @@ class DDEXOrderBookTrackerEntry(OrderBookTrackerEntry):
 
     @property
     def active_order_tracker(self) -> DDEXActiveOrderTracker:
+        return self._active_order_tracker
+
+
+class KyberOrderBookTrackerEntry(OrderBookTrackerEntry):
+    def __init__(
+        self, trading_pair: str, timestamp: float, order_book: OrderBook, active_order_tracker: KyberActiveOrderTracker
+    ):
+        self._active_order_tracker = active_order_tracker
+        super(KyberOrderBookTrackerEntry, self).__init__(trading_pair, timestamp, order_book)
+
+    def __repr__(self) -> str:
+        return (
+            f"DDEXOrderBookTrackerEntry(trading_pair='{self._trading_pair}', timestamp='{self._timestamp}', "
+            f"order_book='{self._order_book}')"
+        )
+
+    @property
+    def active_order_tracker(self) -> KyberActiveOrderTracker:
         return self._active_order_tracker
 
 

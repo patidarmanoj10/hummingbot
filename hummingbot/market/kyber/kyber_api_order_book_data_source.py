@@ -10,9 +10,14 @@ from typing import List, Optional, Dict, Any
 import time
 from hummingbot.core.utils import async_ttl_cache
 from hummingbot.core.data_type.order_book import OrderBook
+from hummingbot.market.kyber.kyber_active_order_tracker import KyberActiveOrderTracker
 from hummingbot.core.data_type.order_book_tracker_data_source import OrderBookTrackerDataSource
 from hummingbot.logger import HummingbotLogger
 from hummingbot.market.kyber.kyber_order_book import KyberOrderBook
+from hummingbot.core.data_type.order_book_tracker_entry import (
+    DDEXOrderBookTrackerEntry,
+    OrderBookTrackerEntry
+)
 from hummingbot.core.data_type.order_book_message import DDEXOrderBookMessage
 
 REST_URL = "https://api.kyber.network"
@@ -124,6 +129,11 @@ class KyberAPIOrderBookDataSource(OrderBookTrackerDataSource):
                     print('snapshot_msg', snapshot_msg)
                     kyber_order_book: OrderBook = self.order_book_create_function()
                     print('kyber_order_book', kyber_order_book)
+                    kyber_active_order_tracker: KyberActiveOrderTracker = KyberActiveOrderTracker()
+                    bids, asks = kyber_active_order_tracker.convert_snapshot_message_to_order_book_row(snapshot_msg)
+                    print('bids', bids)
+                    print('asks', asks)
+                    kyber_order_book.apply_snapshot(bids, asks, snapshot_msg.update_id)
                 except IOError:
                     self.logger().network(
                         f"Error getting snapshot for {trading_pair}.",
