@@ -3,9 +3,11 @@
 from collections import namedtuple
 from enum import Enum
 from functools import total_ordering
-import pandas as pd
-from typing import Optional, List, Dict
-import time
+from typing import (
+    Dict,
+    List,
+    Optional,
+)
 
 from hummingbot.core.data_type.order_book_row import OrderBookRow
 
@@ -664,3 +666,4 @@ class LiquidOrderBookMessage(OrderBookMessage):
         return [
             OrderBookRow(float(price), float(amount), self.update_id) for price, amount, *trash in self.content.get("bids", [])
         ]
+

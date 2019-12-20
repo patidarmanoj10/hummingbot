@@ -220,3 +220,4 @@ class LiquidOrderBookTrackerEntry(OrderBookTrackerEntry):
     @property
     def order_book(self) -> (OrderBook):
         return self._order_book
+

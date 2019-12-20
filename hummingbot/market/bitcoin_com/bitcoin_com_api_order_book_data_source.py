@@ -10,7 +10,6 @@ from typing import Optional, List, Dict, Any
 from hummingbot.core.data_type.order_book import OrderBook
 from hummingbot.core.data_type.order_book_message import OrderBookMessage
 from hummingbot.core.data_type.order_book_tracker_data_source import OrderBookTrackerDataSource
-from hummingbot.core.data_type.order_book_tracker_entry import BitcoinComOrderBookTrackerEntry
 from hummingbot.core.utils import async_ttl_cache
 from hummingbot.core.utils.async_utils import safe_gather
 from hummingbot.logger import HummingbotLogger
@@ -18,6 +17,7 @@ from hummingbot.market.bitcoin_com.bitcoin_com_active_order_tracker import Bitco
 from hummingbot.market.bitcoin_com.bitcoin_com_order_book import BitcoinComOrderBook
 from hummingbot.market.bitcoin_com.bitcoin_com_websocket import BitcoinComWebsocket
 from hummingbot.market.bitcoin_com.bitcoin_com_utils import merge_dicts, add_event_type, EventTypes
+from hummingbot.market.bitcoin_com.bitcoin_com_order_book_tracker_entry import BitcoinComOrderBookTrackerEntry
 
 
 class BitcoinComAPIOrderBookDataSource(OrderBookTrackerDataSource):
@@ -175,7 +175,7 @@ class BitcoinComAPIOrderBookDataSource(OrderBookTrackerDataSource):
             except Exception:
                 self.logger().error(f"Error initializing order book for {trading_pair}. ", exc_info=True)
 
-            return tracking_pairs
+        return tracking_pairs
 
     async def listen_for_trades(self, ev_loop: asyncio.BaseEventLoop, output: asyncio.Queue):
         """
@@ -215,7 +215,7 @@ class BitcoinComAPIOrderBookDataSource(OrderBookTrackerDataSource):
                 self.logger().error("Unexpected error.", exc_info=True)
                 await asyncio.sleep(5.0)
             finally:
-                ws.disconnect()
+                await ws.disconnect()
 
     async def listen_for_order_book_diffs(self, ev_loop: asyncio.BaseEventLoop, output: asyncio.Queue):
         """
@@ -258,7 +258,7 @@ class BitcoinComAPIOrderBookDataSource(OrderBookTrackerDataSource):
                 )
                 await asyncio.sleep(30.0)
             finally:
-                ws.disconnect()
+                await ws.disconnect()
 
     async def listen_for_order_book_snapshots(self, ev_loop: asyncio.BaseEventLoop, output: asyncio.Queue):
         """
