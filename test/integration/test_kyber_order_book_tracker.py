@@ -82,12 +82,8 @@ class KyberOrderBookTrackerUnitTest(unittest.TestCase):
             for trading_pair, order_book in self.order_book_tracker.order_books.items():
                 order_book.add_listener(event_tag, self.event_logger)
 
-    @unittest.skipUnless(any("test_order_book_trade_event_emission" in arg for arg in sys.argv),
-                         "test_order_book_trade_event_emission test requires waiting or manual trade.")
-
     def test_tracker_integrity(self):
         # Wait 5 seconds to process some diffs.
-        print('11')
         self.ev_loop.run_until_complete(asyncio.sleep(5.0))
         order_books: Dict[str, OrderBook] = self.order_book_tracker.order_books
         usdc_dai_book: OrderBook = order_books["0xdd974d5c2e2928dea5f71b9825b8b646686bd200"]
@@ -95,7 +91,7 @@ class KyberOrderBookTrackerUnitTest(unittest.TestCase):
         # print("usdc_dai_book")
         # print(usdc_dai_book.snapshot)
         # print("weth_dai_book")
-        # print(weth_dai_book.snapshot)
+        print(usdc_dai_book.get_price_for_volume(True, 10).result_price)
         self.assertGreaterEqual(usdc_dai_book.get_price_for_volume(True, 10).result_price,
                                 usdc_dai_book.get_price(True))
         self.assertLessEqual(usdc_dai_book.get_price_for_volume(False, 10).result_price,

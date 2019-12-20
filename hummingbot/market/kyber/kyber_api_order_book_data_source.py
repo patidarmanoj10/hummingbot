@@ -6,7 +6,7 @@ import aiohttp
 import logging
 import pandas as pd
 import uuid
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict
 import time
 from hummingbot.core.utils import async_ttl_cache
 from hummingbot.core.data_type.order_book import OrderBook
@@ -15,10 +15,8 @@ from hummingbot.core.data_type.order_book_tracker_data_source import OrderBookTr
 from hummingbot.logger import HummingbotLogger
 from hummingbot.market.kyber.kyber_order_book import KyberOrderBook
 from hummingbot.core.data_type.order_book_tracker_entry import (
-    DDEXOrderBookTrackerEntry,
-    OrderBookTrackerEntry
+    KyberOrderBookTrackerEntry
 )
-from hummingbot.core.data_type.order_book_message import DDEXOrderBookMessage
 
 REST_URL = "https://api.kyber.network"
 MARKET_URL = "/market"
@@ -82,7 +80,7 @@ class KyberAPIOrderBookDataSource(OrderBookTrackerDataSource):
 
     async def get_snapshot(self, client: aiohttp.ClientSession, base_currency_id: str, level: int = 3) -> Dict[str, any]:
         # TODO: use random number for qty
-        params: Dict = {"id": base_currency_id, "qty": 10 }
+        params: Dict = {"id": base_currency_id, "qty": 10}
         bids = []
         asks = []
         for i in range(1):
@@ -107,7 +105,7 @@ class KyberAPIOrderBookDataSource(OrderBookTrackerDataSource):
                 for item in response:
                     ask = {"orderId": str(uuid.uuid4()), "amount": item["src_qty"][0], "price": item["dst_qty"][0] / item["src_qty"][0]}
                 asks.append(ask)
-            response = { "data": { "orderBook": { "marketId": base_currency_id, "bids": bids, "asks": asks }}}
+            response = {"data": {"orderBook": {"marketId": base_currency_id, "bids": bids, "asks": asks}}}
         return response
 
     async def get_tracking_pairs(self):
@@ -115,6 +113,7 @@ class KyberAPIOrderBookDataSource(OrderBookTrackerDataSource):
             trading_pairs: List[str] = await self.get_trading_pairs()
             print('trading_pairs', trading_pairs)
             number_of_pairs: int = len(trading_pairs)
+            retval: Dict[str, KyberOrderBookTrackerEntry] = {}
             print('number_of_pairs', number_of_pairs)
             for index, trading_pair in enumerate(trading_pairs):
                 try:
@@ -134,6 +133,13 @@ class KyberAPIOrderBookDataSource(OrderBookTrackerDataSource):
                     print('bids', bids)
                     print('asks', asks)
                     kyber_order_book.apply_snapshot(bids, asks, snapshot_msg.update_id)
+                    retval[trading_pair] = KyberOrderBookTrackerEntry(
+                        trading_pair,
+                        snapshot_timestamp,
+                        kyber_order_book,
+                        kyber_active_order_tracker
+                    )
+                    return retval
                 except IOError:
                     self.logger().network(
                         f"Error getting snapshot for {trading_pair}.",
